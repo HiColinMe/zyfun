@@ -537,13 +537,17 @@ onDeactivated(() => deactivateDispose());
 const setup = async () => {
   await getSiteData();
 
-  if (isNil(siteData.value?.id)) {
+  const { id, type } = siteData.value;
+
+  if (isNil(id)) {
     MessagePlugin.warning(t('pages.lab.edit.message.noInitSource'));
     return;
   }
 
-  active.value.type = siteData.value.type as ISiteType;
-  editText.value.code = await readFile(active.value.type, 'silence');
+  nextTick(() => (codeEditConf.value.language = SITE_MONACO_MAP[type].language));
+
+  active.value.type = type as ISiteType;
+  editText.value.code = await readFile(type as ISiteType, 'silence');
   await connectLogger();
 };
 
