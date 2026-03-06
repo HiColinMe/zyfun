@@ -1,25 +1,6 @@
 import { request } from '@main/utils/request';
 import { buildUrl, getHome } from '@shared/modules/headers';
-import type {
-  ICmsAction,
-  ICmsActionOptions,
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 
 const lienName: Record<string, string> = {
   bfzym3u8: '暴风',
@@ -74,9 +55,9 @@ class T3AppYsV2Adapter {
     this.randomPrefix = `${Date.now() / 1000}Prefix:`;
   }
 
-  async init(): Promise<ICmsInit> {}
+  async init(): ICmsResultPromise['init'] {}
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const { data: resp } = await request.request({
       url: buildUrl(this.api, this.type === 1 ? '/types' : '/nav'),
       method: 'GET',
@@ -136,7 +117,7 @@ class T3AppYsV2Adapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const { data: resp } = await request.request({
       url: buildUrl(this.api, this.type === 1 ? '/vodPhbAll' : '/index_video'),
       method: 'GET',
@@ -167,7 +148,7 @@ class T3AppYsV2Adapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { page, tid, extend: fl = {} } = doc || {};
     const f = `class=${fl.class || ''}&area=${fl.area || ''}&lang=${fl.lang || ''}&letter=${fl.letter || ''}&year=${fl.year || ''}&by=${fl.by || ''}`;
 
@@ -200,7 +181,7 @@ class T3AppYsV2Adapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc;
     const idsArray = ids.split(',');
 
@@ -311,7 +292,7 @@ class T3AppYsV2Adapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page } = doc || {};
 
     const { data: resp } = await request.request({
@@ -325,7 +306,7 @@ class T3AppYsV2Adapter {
     const rawLimit = this.type === 1 ? resp?.data?.limit : resp?.limit;
     const rawList = Array.isArray(srcList) ? srcList : [];
 
-    const videos: ICmsHomeVod['list'] = rawList
+    const videos = rawList
       .map((v) => ({
         vod_id: String(v.vod_id ?? ''),
         vod_name: v.vod_name ?? '',
@@ -343,7 +324,7 @@ class T3AppYsV2Adapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { play, flag } = doc;
 
     const res = {
@@ -353,15 +334,15 @@ class T3AppYsV2Adapter {
     return res;
   }
 
-  async action(_doc: ICmsActionOptions): Promise<ICmsAction> {
+  async action(_doc: ICmsParams['action']): ICmsResultPromise['action'] {
     return '';
   }
 
-  async proxy(_doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     return [];
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 

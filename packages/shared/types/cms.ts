@@ -52,6 +52,8 @@ export type ICmsProxyOptions = Record<string, string>;
 
 export type ICmsRunMianOptions = Record<string, string>;
 
+export type ICmsDestroyOptions = void;
+
 // output results
 
 export interface ICmsInfoBase {
@@ -307,6 +309,8 @@ export type ICmsProxy = [number, string, string] | [];
 
 export type ICmsRunMian = any;
 
+export type ICmsDestroy = void;
+
 export interface IRecMatch {
   vod_douban_id: string;
   vod_douban_type: string;
@@ -325,6 +329,7 @@ export interface ICmsParams {
   action: ICmsActionOptions;
   proxy: ICmsProxyOptions;
   runMain: ICmsRunMianOptions;
+  destroy: ICmsDestroyOptions;
 }
 
 export interface ICmsResult {
@@ -338,7 +343,16 @@ export interface ICmsResult {
   action: ICmsAction;
   proxy: ICmsProxy;
   runMain: ICmsRunMian;
+  destroy: ICmsDestroy;
 }
+
+export type ICmsResultPromise = {
+  [K in keyof ICmsResult]: ICmsResult[K] extends (...args: infer A) => infer R
+    ? 0 extends 1 & ICmsResult[K]
+      ? Promise<ICmsResult[K]>
+      : (...args: A) => Promise<R>
+    : Promise<ICmsResult[K]>;
+};
 
 export type ICmsMethodName = keyof ICmsResult;
 
@@ -351,7 +365,12 @@ export type ICms = {
 };
 
 export type ICmsAdapter = ICms & {
-  destroy?: () => Promise<void> | void;
   prepare?: () => Promise<void> | void;
   terminate?: () => Promise<void> | void;
 };
+
+export interface ICmsAdapterConstructor {
+  new (...args: any[]): ICmsAdapter;
+  prepare?: () => Promise<void> | void;
+  terminate?: () => Promise<void> | void;
+}

@@ -6,7 +6,7 @@ import { hash } from '@shared/modules/crypto';
 import LruCache from '@shared/modules/lrucache';
 import singleton from '@shared/modules/singleton';
 import { isNil, isPositiveFiniteNumber } from '@shared/modules/validate';
-import type { ICmsAdapter } from '@shared/types/cms';
+import type { ICmsAdapter, ICmsAdapterConstructor } from '@shared/types/cms';
 
 import {
   T0Adapter,
@@ -131,7 +131,7 @@ export const prepare = async (uuid: string, force: boolean = false): Promise<ICm
 };
 
 export const terminate = async () => {
-  const modules = Object.values(CMS_ADAPTER_MAP) as Array<any>;
+  const modules = Object.values(CMS_ADAPTER_MAP) as Array<ICmsAdapterConstructor>;
   for (const module of modules) {
     const SingleAdapter = singleton(module);
     if (SingleAdapter?.terminate) await SingleAdapter.terminate();

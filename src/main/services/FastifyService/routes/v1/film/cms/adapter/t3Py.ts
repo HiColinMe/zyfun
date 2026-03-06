@@ -6,26 +6,7 @@ import { APP_PUBLIC_PATH } from '@main/utils/path';
 import { request } from '@main/utils/request';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { isJson } from '@shared/modules/validate';
-import type {
-  ICmsAction,
-  ICmsActionOptions,
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import workerpool from 'workerpool';
 import * as zmq from 'zeromq';
 
@@ -223,7 +204,7 @@ export class T3PyAdapter {
     return result;
   }
 
-  async init(): Promise<ICmsInit> {
+  async init(): ICmsResultPromise['init'] {
     let content = '';
     if (this.api.startsWith('http')) {
       const { data } = await request.request({ url: this.api, method: 'GET' });
@@ -235,7 +216,7 @@ export class T3PyAdapter {
     return resp;
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const resp = await this.execCtx('homeContent', [true]);
 
     const rawClassList = Array.isArray(resp?.class) ? resp.class : [];
@@ -264,7 +245,7 @@ export class T3PyAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const resp = await this.execCtx('homeVideoContent', []);
 
     const rawList = Array.isArray(resp?.list) ? resp.list : [];
@@ -286,7 +267,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page = 1, extend = {} } = doc || {};
     const resp = await this.execCtx('categoryContent', [tid, page, Object.keys(extend).length > 0, extend]);
 
@@ -309,7 +290,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const resp = await this.execCtx('detailContent', [[ids]]);
 
@@ -344,7 +325,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc || {};
     const resp = await this.execCtx('searchContent', [wd, false, page]);
 
@@ -367,7 +348,7 @@ export class T3PyAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc || {};
     const resp = await this.execCtx('playerContent', [flag, play, []]);
 
@@ -393,18 +374,18 @@ export class T3PyAdapter {
     return res;
   }
 
-  async action(doc: ICmsActionOptions): Promise<ICmsAction> {
+  async action(doc: ICmsParams['action']): ICmsResultPromise['action'] {
     const { action, value, timeout } = doc || {};
     const resp = await this.execCtx('actionContent', [action, value, timeout]);
     return resp;
   }
 
-  async proxy(doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async proxy(doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     const resp = await this.execCtx('localProxy', [doc]);
     return resp;
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 }

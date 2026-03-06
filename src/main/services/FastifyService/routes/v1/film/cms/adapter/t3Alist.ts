@@ -1,25 +1,6 @@
 import { request } from '@main/utils/request';
 import { isJsonStr } from '@shared/modules/validate';
-import type {
-  ICmsAction,
-  ICmsActionOptions,
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import JSON5 from 'json5';
 
 interface ISource {
@@ -74,7 +55,7 @@ class T3AlistAdapter {
     this.ext = source.ext!;
   }
 
-  async init(): Promise<ICmsInit> {
+  async init(): ICmsResultPromise['init'] {
     let ext: string = this.ext;
     let source: ISource = { name: '', server: '' };
 
@@ -136,15 +117,15 @@ class T3AlistAdapter {
     await this.getToken();
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     return { class: [{ type_id: 'default', type_name: '默认' }], filters: {} };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     return { page: 1, pagecount: 0, total: 0, list: [] };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { page = 1, tid: rawTid = '/' } = doc || {};
 
     const tid = rawTid === 'default' ? this.startPage : rawTid;
@@ -189,7 +170,7 @@ class T3AlistAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const idsArray = [ids];
 
@@ -237,7 +218,7 @@ class T3AlistAdapter {
   /**
    * only v3+ and enable search
    */
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc || {};
 
     if (!this.settings.enableSearch) {
@@ -280,20 +261,20 @@ class T3AlistAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { play } = doc || {};
     return { parse: 0, url: play };
   }
 
-  async action(_doc: ICmsActionOptions): Promise<ICmsAction> {
+  async action(_doc: ICmsParams['action']): ICmsResultPromise['action'] {
     return '';
   }
 
-  async proxy(_doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     return [];
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 

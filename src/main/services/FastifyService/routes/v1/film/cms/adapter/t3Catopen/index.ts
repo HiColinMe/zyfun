@@ -5,37 +5,15 @@ import { APP_PUBLIC_PATH } from '@main/utils/path';
 import { request } from '@main/utils/request';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { isJson, isJsonStr } from '@shared/modules/validate';
-import type {
-  ICmsAction,
-  ICmsActionOptions,
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsMethodName,
-  ICmsParams,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsResult,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsMethodName, ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import JSON5 from 'json5';
 import type { Pool } from 'workerpool';
 import workerpool from 'workerpool';
 
 const logger = loggerService.withContext(SITE_LOGGER_MAP[SITE_TYPE.T3_CATOPEN]);
 
-type ICmsResultCustom = Omit<ICmsResult, 'play'> & {
-  play: ICmsPlay & {
+type ICmsResultCustom = Omit<Awaited<ICmsResultPromise>, 'play'> & {
+  play: Awaited<ICmsResultPromise['play']> & {
     parse_extra?: string;
     js?: string;
     header?: Record<string, any>;
@@ -93,7 +71,7 @@ class T3CatopenAdapter {
     return resp;
   }
 
-  public async init(): Promise<ICmsInit> {
+  public async init(): ICmsResultPromise['init'] {
     let ext: string = this.ext;
 
     const { data: code } = await request.request({
@@ -111,7 +89,7 @@ class T3CatopenAdapter {
     });
   }
 
-  public async home(): Promise<ICmsHome> {
+  public async home(): ICmsResultPromise['home'] {
     const resp = await this.execCtx('home');
 
     const rawClassList = Array.isArray(resp?.class) ? resp?.class : [];
@@ -140,7 +118,7 @@ class T3CatopenAdapter {
     return { class: classes, filters };
   }
 
-  public async homeVod(): Promise<ICmsHomeVod> {
+  public async homeVod(): ICmsResultPromise['homeVod'] {
     const resp = await this.execCtx('homeVod');
 
     const rawList = Array.isArray(resp?.list) ? resp.list : [];
@@ -162,7 +140,7 @@ class T3CatopenAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  public async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page = 1, extend = {} } = doc || {};
     const resp = await this.execCtx('category', { tid, page, extend });
 
@@ -185,7 +163,7 @@ class T3CatopenAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  public async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const resp = await this.execCtx('detail', { ids });
 
@@ -220,7 +198,7 @@ class T3CatopenAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  public async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc || {};
     const resp = await this.execCtx('search', { wd, page });
 
@@ -243,7 +221,7 @@ class T3CatopenAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  public async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  public async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc || {};
     const resp = await this.execCtx('play', { flag, play });
 
@@ -269,18 +247,18 @@ class T3CatopenAdapter {
     return res;
   }
 
-  async action(doc: ICmsActionOptions): Promise<ICmsAction> {
+  async action(doc: ICmsParams['action']): ICmsResultPromise['action'] {
     const { action, value, timeout } = doc || {};
     const resp = await this.execCtx('action', { action, value, timeout });
     return resp;
   }
 
-  async proxy(doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async proxy(doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     const resp = await this.execCtx('proxy', doc);
     return resp;
   }
 
-  async runMain(doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     const resp = await this.execCtx('runMain', doc);
     return resp;
   }

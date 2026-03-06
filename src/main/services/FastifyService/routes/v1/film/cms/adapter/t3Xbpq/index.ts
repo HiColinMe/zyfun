@@ -5,26 +5,7 @@ import { request } from '@main/utils/request';
 import { SITE_LOGGER_MAP, SITE_TYPE } from '@shared/config/film';
 import { hash } from '@shared/modules/crypto';
 import { getHome, urlResolve } from '@shared/modules/headers';
-import type {
-  ICmsAction,
-  ICmsActionOptions,
-  ICmsCategory,
-  ICmsCategoryOptions,
-  ICmsDetail,
-  ICmsDetailOptions,
-  ICmsHome,
-  ICmsHomeVod,
-  ICmsInit,
-  ICmsPlay,
-  ICmsPlayOptions,
-  ICmsProxy,
-  ICmsProxyOptions,
-  ICmsRunMian,
-  ICmsRunMianOptions,
-  ICmsSearch,
-  ICmsSearchOptions,
-  IConstructorOptions,
-} from '@shared/types/cms';
+import type { ICmsParams, ICmsResultPromise, IConstructorOptions } from '@shared/types/cms';
 import JSON5 from 'json5';
 
 import {
@@ -468,7 +449,7 @@ class T3XbpqAdapter {
     };
   }
 
-  async init(): Promise<ICmsInit> {
+  async init(): ICmsResultPromise['init'] {
     let res = this.source.ext;
     if (this.source.ext!.startsWith('http')) {
       const { data } = await request.request({
@@ -696,7 +677,7 @@ class T3XbpqAdapter {
     }
   }
 
-  async home(): Promise<ICmsHome> {
+  async home(): ICmsResultPromise['home'] {
     const classData = this.getRuleValue(['分类']);
     const rawClassList: Array<{ type_id: string; type_name: string }> = [];
 
@@ -748,7 +729,7 @@ class T3XbpqAdapter {
     return { class: classes, filters };
   }
 
-  async homeVod(): Promise<ICmsHomeVod> {
+  async homeVod(): ICmsResultPromise['homeVod'] {
     const 主页url = this.getRuleValue(['主页url'], '');
     const 分类url = getHome(this.getRuleValue(['分类url']));
     const 主页surl = this.rule['主页surl'] || '';
@@ -790,7 +771,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async category(doc: ICmsCategoryOptions): Promise<ICmsCategory> {
+  async category(doc: ICmsParams['category']): ICmsResultPromise['category'] {
     const { tid, page: pg = 1, extend = {} } = doc || {};
 
     let host = getHome(this.getRuleValue(['分类url']));
@@ -922,7 +903,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async detail(doc: ICmsDetailOptions): Promise<ICmsDetail> {
+  async detail(doc: ICmsParams['detail']): ICmsResultPromise['detail'] {
     const { ids } = doc || {};
     const idsArray = ids.split(',');
     let vod_url = ids || '';
@@ -1316,7 +1297,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async search(doc: ICmsSearchOptions): Promise<ICmsSearch> {
+  async search(doc: ICmsParams['search']): ICmsResultPromise['search'] {
     const { wd, page = 1 } = doc;
     let url = this.getRuleValue(['搜索url'], '/index.php/ajax/suggest?mid=1&wd={wd}&limit=500');
     url = url.replace('{wd}', wd).replace('{pg}', String(page)).replace('{catePg}', String(page));
@@ -1437,7 +1418,7 @@ class T3XbpqAdapter {
     return { page: pagecurrent, pagecount, total, list: videos };
   }
 
-  async play(doc: ICmsPlayOptions): Promise<ICmsPlay> {
+  async play(doc: ICmsParams['play']): ICmsResultPromise['play'] {
     const { flag, play } = doc;
     let input = play;
 
@@ -1534,15 +1515,15 @@ class T3XbpqAdapter {
     return playobj;
   }
 
-  async action(_doc: ICmsActionOptions): Promise<ICmsAction> {
+  async action(_doc: ICmsParams['action']): ICmsResultPromise['action'] {
     return '';
   }
 
-  async proxy(_doc: ICmsProxyOptions): Promise<ICmsProxy> {
+  async proxy(_doc: ICmsParams['proxy']): ICmsResultPromise['proxy'] {
     return [];
   }
 
-  async runMain(_doc: ICmsRunMianOptions): Promise<ICmsRunMian> {
+  async runMain(_doc: ICmsParams['runMain']): ICmsResultPromise['runMain'] {
     return '';
   }
 
