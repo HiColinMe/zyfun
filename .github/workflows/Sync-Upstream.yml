@@ -1,0 +1,42 @@
+name: Sync Upstream
+
+env:
+  # 设置上游仓库的地址
+  UPSTREAM_REPO: https://github.com/Hiram-Wong/zyfun.git
+  GITHUB_TOKEN: ${{ github.token }}
+  GIT_USER_NAME: github-actions[bot]
+  GIT_USER_EMAIL: github-actions[bot]@users.noreply.github.com
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Sync
+        run: |
+          git config user.name "${{ env.GIT_USER_NAME }}"
+          git config user.email "${{ env.GIT_USER_EMAIL }}"
+          
+          git remote remove upstream || true
+          git remote add upstream "${{ env.UPSTREAM_REPO }}"
+          
+          git fetch upstream
+          
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "Syncing branch: $CURRENT_BRANCH"
+          
+          git merge upstream/$CURRENT_BRANCH --no-edit -X theirs
+          
+          git push origin $CURRENT_BRANCH
+          echo "Sync finished."
